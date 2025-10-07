@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Copy Code</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #1e1e1e;
+      color: #dcdcdc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    pre {
+      background: #2d2d2d;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      max-width: 90%;
+      max-height: 70vh;
+      overflow: auto;
+      white-space: pre;
+      text-align: left;
+    }
+    .status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .copied {
+      color: #00ff7f;
+    }
+    .error {
+      color: #ff6b6b;
+    }
+  </style>
+</head>
+<body>
+  <h2 id="title">Auto Copy Code</h2>
+  <pre id="code-block">Loading...</pre>
+  <div id="status" class="status"></div>
+
+  <script>
+    async function loadCode() {
+      // Get ?file=fcfs from URL
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get("file");
+
+      const title = document.getElementById("title");
+      const codeBlock = document.getElementById("code-block");
+      const status = document.getElementById("status");
+
+      if (!file) {
+        title.textContent = "Available Codes";
+        codeBlock.textContent =
+          "Usage:\n?file=fcfsdisk\n?file=pass1\n?file=pass2\n";
+        return;
+      }
+
+      title.textContent = `Code: ${file}.c`;
+
+      try {
+        const response = await fetch(`${file}.c`);
+        if (!response.ok) throw new Error("File not found");
+        const code = await response.text();
+
+        codeBlock.textContent = code;
+
+        // Auto copy to clipboard
+        await navigator.clipboard.writeText(code);
+        status.textContent = "✅ Code copied to clipboard!";
+        status.classList.add("copied");
+      } catch (err) {
+        codeBlock.textContent = "❌ Unable to load this code.";
+        status.textContent = err.message;
+        status.classList.add("error");
+      }
+    }
+
+    loadCode();
+  </script>
+</body>
+</html>

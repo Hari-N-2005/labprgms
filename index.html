@@ -45,44 +45,52 @@
   <pre id="code-block">Loading...</pre>
   <div id="status" class="status"></div>
 
-  <script>
-    async function loadCode() {
-      // Get ?file=fcfs from URL
-      const params = new URLSearchParams(window.location.search);
-      const file = params.get("file");
+<script>
+  async function loadCode() {
+    // Get ?file=fcfs from URL
+    const params = new URLSearchParams(window.location.search);
+    const file = params.get("file");
 
-      const title = document.getElementById("title");
-      const codeBlock = document.getElementById("code-block");
-      const status = document.getElementById("status");
+    const title = document.getElementById("title");
+    const codeBlock = document.getElementById("code-block");
+    const status = document.getElementById("status");
 
-      if (!file) {
-        title.textContent = "Available Codes";
-        codeBlock.textContent =
-          "Usage:\n?file=fcfsdisk\n?file=pass1\n?file=pass2\n";
-        return;
-      }
+    if (!file) {
+      title.textContent = "Available Codes";
+      codeBlock.textContent =
+        "Usage:\n?file=fcfs\n?file=sjf\n?file=rr\n?file=priority\n?file=fcfsdisk\n?file=scan\n?file=cscan\n?file=sequential\n?file=linked\n?file=indexed\n?file=pass1\n?file=pass2\n";
+      return;
+    }
 
-      title.textContent = `Code: ${file}.c`;
+    title.textContent = `Code: ${file}.c`;
 
+    try {
+      const response = await fetch(`${file}.c`);
+      if (!response.ok) throw new Error("File not found");
+      const code = await response.text();
+
+      codeBlock.textContent = code;
+
+      // ✅ Optional auto-copy wrapped in try/catch
       try {
-        const response = await fetch(`${file}.c`);
-        if (!response.ok) throw new Error("File not found");
-        const code = await response.text();
-
-        codeBlock.textContent = code;
-
-        // Auto copy to clipboard
         await navigator.clipboard.writeText(code);
         status.textContent = "✅ Code copied to clipboard!";
         status.classList.add("copied");
-      } catch (err) {
-        codeBlock.textContent = "❌ Unable to load this code.";
-        status.textContent = err.message;
-        status.classList.add("error");
+      } catch (copyErr) {
+        console.warn("Clipboard permission denied or unavailable:", copyErr);
+        status.textContent = "⚠️ Unable to copy automatically. You can copy manually.";
+        status.classList.add("warning");
       }
-    }
 
-    loadCode();
-  </script>
+    } catch (err) {
+      codeBlock.textContent = "❌ Unable to load this code.";
+      status.textContent = err.message;
+      status.classList.add("error");
+    }
+  }
+
+  loadCode();
+</script>
+
 </body>
 </html>

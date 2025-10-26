@@ -1,83 +1,107 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-void main()
-{
-    FILE *f1,*f2,*f3,*f4,*f5;
-    int len,i,pos=1;
-    char arg[20],mne[20],opnd[20],la[20],name[20],mne1[20],opnd1[20],pos1[10],pos2[10];
-    f1=fopen("inputm.txt","r");
-    f2=fopen("namtab.txt","w+");
-    f3=fopen("deftab.txt","w+");
-    f4=fopen("argtab.txt","w+");
-    f5=fopen("op.txt","w+");
-    fscanf(f1,"%s%s%s",la,mne,opnd);
-    while(strcmp(mne,"END")!=0)
-    {
-        if(strcmp(mne,"MACRO")==0)
-        {
-            fprintf(f2,"%s\n",la);
-            fseek(f2,SEEK_SET,0);
-            fprintf(f3,"%s\t%s\n",la,opnd);
-            fscanf(f1,"%s%s%s",la,mne,opnd);
-            while(strcmp(mne,"MEND")!=0)
-            {
-                if(opnd[0]=='&')
-                {
-                    sprintf(pos1,"%d",pos);
-                    strcpy(pos2,"?");
-                    strcpy(opnd,strcat(pos2,pos1));
-                    pos=pos+1;
-                }
-                fprintf(f3,"%s\t%s\n",mne,opnd);
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-                fscanf(f1,"%s%s%s",la,mne,opnd);
-            }
-            fprintf(f3,"%s",mne);
-        }
-        else
-        {
-            fscanf(f2,"%s",name);
-            if(strcmp(mne,name)==0)
-            {
-                len=strlen(opnd);
-                for(i=0;i<len;i++)
-                {
-                    if(opnd[i]!=',')
-                        fprintf(f4,"%c",opnd[i]);
-                    else
-                        fprintf(f4,"\n");
+int main() {
+    FILE *input, *namtab, *deftab, *output;
+    char label[20], opcode[20], operand[50];
+    char mname[20], defop[20], defopnd[50];
+    char argtab[10][20], formal[10][20];
+    int argCount, i;
 
-                }
-                fseek(f3,SEEK_SET,0);
-                fseek(f4,SEEK_SET,0);
-                fscanf(f3,"%s%s",mne1,opnd1);
-                fprintf(f5,".\t%s\t%s\n",mne1,opnd);
-                fscanf(f3,"%s%s",mne1,opnd1);
-                while(strcmp(mne1,"MEND")!=0)
-                {
-                    if((opnd[0]=='?'))
-                    {
-                        fscanf(f4,"%s",arg);
-                        fprintf(f5,"-\t%s\t%s\n",mne1,arg);
-                    }
-                    else
-                        fprintf(f5,"-\t%s\t%s\n",mne1,opnd1);
-                    fscanf(f3,"%s%s",mne1,opnd1);
-                }
-            }
+    input  = fopen("inputm.txt", "r");
+    namtab = fopen("namtab.txt", "w+");
+    deftab = fopen("deftab.txt", "w+");
+    output = fopen("op.txt", "w");
 
-            else
-                fprintf(f5,"%s\t%s\t%s\n",la,mne,opnd);
-
-        }
-        fscanf(f1,"%s%s%s",la,mne,opnd);
+    if (!input) {
+        printf("Error: inputm.txt not found!\n");
+        return 1;
     }
-    fprintf(f5,"%s\t%s\t%s",la,mne,opnd);
-    fclose(f1);
-    fclose(f2);
-    fclose(f3);
-    fclose(f4);
-    fclose(f5);
-    printf("Successfully implemented single pass macroprocessor. \n");
+
+    fscanf(input, "%s%s%s", label, opcode, operand);
+
+    while (strcmp(opcode, "END") != 0) {
+
+        // ⿡ Store macro definition
+        if (strcmp(opcode, "MACRO") == 0) {
+            fprintf(namtab, "%s\n", label);          // Save macro name
+            fprintf(deftab, "%s %s\n", label, operand); // Save header
+
+            // Store formal parameters (&FROM,&TO)
+            argCount = 0;
+            char *tok = strtok(operand, ",");
+            while (tok) {
+                strcpy(formal[argCount++], tok);
+                tok = strtok(NULL, ",");
+            }
+
+            // Copy body till MEND
+            fscanf(input, "%s%s%s", label, opcode, operand);
+            while (strcmp(opcode, "MEND") != 0) {
+                fprintf(deftab, "%s %s\n", opcode, operand);
+                fscanf(input, "%s%s%s", label, opcode, operand);
+            }
+            fprintf(deftab, "MEND -\n");
+        }
+
+        // ⿢ If macro call found
+        else {
+            rewind(namtab);
+            int found = 0;
+
+            while (fscanf(namtab, "%s", mname) != EOF) {
+                if (strcmp(opcode, mname) == 0) {
+                    found = 1;
+                     fprintf(output, "%s\t%s\t%s\n", label, opcode, operand);
+                    break;
+                }
+            }
+
+            if (found) {
+                // Read actual arguments
+                argCount = 0;
+                char *tok = strtok(operand, ",");
+                while (tok) {
+                    strcpy(argtab[argCount++], tok);
+                    tok = strtok(NULL, ",");
+                }
+
+                // Find macro body in DEFTAB
+                rewind(deftab);
+                while (fscanf(deftab, "%s%s", defop, defopnd) != EOF) {
+                    if (strcmp(defop, opcode) == 0) break;
+                }
+
+                // Expand body
+                while (fscanf(deftab, "%s%s", defop, defopnd) != EOF && strcmp(defop, "MEND") != 0) {
+                    if (defopnd[0] == '&') {
+                        // Replace &NAME by argument
+                        for (i = 0; i < argCount; i++) {
+                            if (strcmp(defopnd, formal[i]) == 0) {
+                                fprintf(output, "-\t%s\t%s\n", defop, argtab[i]);
+                                break;
+                            }
+                        }
+                    } else {
+                        fprintf(output, "-\t%s\t%s\n", defop, defopnd);
+                    }
+                }
+            } else {
+                // Normal line
+                fprintf(output, "%s\t%s\t%s\n", label, opcode, operand);
+            }
+        }
+
+        fscanf(input, "%s%s%s", label, opcode, operand);
+    }
+
+    fprintf(output, "%s\t%s\t%s\n", label, opcode, operand);
+    printf("\n One-Pass Macro Processor executed successfully.\n");
+
+    fclose(input);
+    fclose(namtab);
+    fclose(deftab);
+    fclose(output);
+    return 0;
 }

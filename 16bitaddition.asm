@@ -8,77 +8,67 @@ DATA ENDS
 
 CODE SEGMENT
 START:
-    ; ===== INITIALIZE DATA SEGMENT =====
     MOV AX, DATA
     MOV DS, AX
-    
-    ; ===== PROMPT FOR FIRST NUMBER =====
+
     LEA DX, MSG
-    MOV AH, 09H        ; Display string function
+    MOV AH, 09H
     INT 21H
-    
-    ; ===== READ FIRST NUMBER (2 DIGITS) =====
-    MOV AH, 01H        ; Read character function
+
+    MOV AH, 01H
     INT 21H
-    MOV BH, AL         ; Store first digit in BH
-    
-    MOV AH, 01H        ; Read second digit
+    MOV BH, AL
+
+    MOV AH, 01H
     INT 21H
-    MOV BL, AL         ; Store second digit in BL
-    
-    ; ===== PROMPT FOR SECOND NUMBER =====
+    MOV BL, AL
+
     LEA DX, MSG2
     MOV AH, 09H
     INT 21H
-    
-    ; ===== READ SECOND NUMBER (2 DIGITS) =====
+
     MOV AH, 01H
     INT 21H
-    MOV CH, AL         ; Store first digit in CH
-    
+    MOV CH, AL
+
     MOV AH, 01H
     INT 21H
-    MOV CL, AL         ; Store second digit in CL
-    
-    ; ===== ADD LOWER DIGITS (BL + CL) =====
-    MOV AL, BL         ; Get second digit of first number
-    MOV AH, 00H        ; Clear AH for addition
-    ADD AL, CL         ; Add second digits
-    AAA                ; ASCII Adjust After Addition
-    ADD AX, 3030H      ; Convert to ASCII characters
-    MOV BL, AL         ; Store units digit of result
-    
-    ; ===== ADD HIGHER DIGITS (BH + CH + CARRY) =====
-    MOV AL, AH         ; Get carry from previous addition
-    MOV AH, 00H        ; Clear AH
-    ADD AL, BH         ; Add first digit of first number
-    ADD AL, CH         ; Add first digit of second number
-    AAA                ; ASCII Adjust After Addition
-    ADD AX, 3030H      ; Convert to ASCII
-    MOV BH, AL         ; Store tens digit of result
-    MOV CL, AH         ; Store hundreds digit (carry) in CL
-    
-    ; ===== DISPLAY RESULT MESSAGE =====
+    MOV CL, AL
+
+    MOV AL, BL
+    MOV AH, 00H
+    ADD AL, CL
+    AAA
+    ADD AX, 3030H
+    MOV BL, AL
+
+    MOV AL, AH
+    MOV AH, 00H
+    ADD AL, BH
+    ADD AL, CH
+    AAA
+    ADD AX, 3030H
+    MOV BH, AL
+    MOV CL, AH
+
     LEA DX, MSG3
     MOV AH, 09H
     INT 21H
-    
-    ; ===== DISPLAY RESULT (3 DIGITS) =====
-    MOV DL, CL         ; Display hundreds digit
-    MOV AH, 02H        ; Display character function
-    INT 21H
-    
-    MOV DL, BH         ; Display tens digit
+
+    MOV DL, CL
     MOV AH, 02H
     INT 21H
-    
-    MOV DL, BL         ; Display units digit
+
+    MOV DL, BH
     MOV AH, 02H
     INT 21H
-    
-    ; ===== EXIT PROGRAM =====
-    MOV AH, 4CH        ; Terminate program
+
+    MOV DL, BL
+    MOV AH, 02H
     INT 21H
-    
+
+    MOV AH, 4CH
+    INT 21H
+
 CODE ENDS
 END START

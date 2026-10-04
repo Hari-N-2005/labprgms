@@ -1,55 +1,69 @@
 #include <stdio.h>
 
-int n, m, t[10][2], vis[1024], q[1024], f = 0, r = 0;
+int n, m;
+int t[10][2][10];
+int dfa[10][10], count = 1;
 
-int main() {
-    printf("Enter number of NFA states: ");
-    scanf("%d", &n);
+int main()
+{
+    scanf("%d%d", &n, &m);
 
-    printf("Enter number of transitions: ");
-    scanf("%d", &m);
-
-    printf("Enter transitions as: from_state input(0/1) to_state\n");
     for (int i = 0; i < m; i++) {
-        int u, c, v;
-        printf("Transition %d: ", i + 1);
-        scanf("%d%d%d", &u, &c, &v);
-        t[u][c] |= 1 << v;
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        t[a][b][c] = 1;
     }
 
-    printf("\nDFA Transitions:\n");
+    dfa[0][0] = 1;   // Start state = {0}
 
-    vis[1] = 1;
-    q[r++] = 1;
+    for (int d = 0; d < count; d++) {
 
-    while (f < r) {
-        int s = q[f++];
-
-        printf("{");
+        printf("{ ");
         for (int i = 0; i < n; i++)
-            if (s & (1 << i))
-                printf("%d", i);
+            if (dfa[d][i])
+                printf("%d ", i);
         printf("}");
 
-        for (int c = 0; c < 2; c++) {
-            int ns = 0;
-            for (int i = 0; i < n; i++)
-                if (s & (1 << i))
-                    ns |= t[i][c];
+        for (int x = 0; x < 2; x++) {
 
-            printf(" --%d--> {", c);
+            int next[10] = {0};
+
             for (int i = 0; i < n; i++)
-                if (ns & (1 << i))
-                    printf("%d", i);
+                if (dfa[d][i])
+                    for (int j = 0; j < n; j++)
+                        if (t[i][x][j])
+                            next[j] = 1;
+
+            printf(" --%d--> { ", x);
+
+            for (int i = 0; i < n; i++)
+                if (next[i])
+                    printf("%d ", i);
+
             printf("}");
 
-            if (!vis[ns]) {
-                vis[ns] = 1;
-                q[r++] = ns;
+            /* Add next state if it is new */
+            int new = 1;
+
+            for (int k = 0; k < count; k++) {
+                int same = 1;
+
+                for (int i = 0; i < n; i++)
+                    if (dfa[k][i] != next[i])
+                        same = 0;
+
+                if (same)
+                    new = 0;
+            }
+
+            if (new) {
+                for (int i = 0; i < n; i++)
+                    dfa[count][i] = next[i];
+
+                count++;
             }
         }
+
         printf("\n");
     }
-
-    return 0;
 }

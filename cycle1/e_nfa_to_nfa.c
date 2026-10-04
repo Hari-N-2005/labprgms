@@ -1,69 +1,94 @@
 #include <stdio.h>
+#include <string.h>
 
-int n, m;
-int t[10][2][10];
-int dfa[10][10], count = 1;
+#define MAX 10
 
-int main()
-{
-    scanf("%d%d", &n, &m);
+int n, m;                     // Number of states and input symbols
+int trans[MAX][MAX][MAX];     // NFA transitions
+int eps[MAX][MAX];            // Epsilon transitions
+int closure[MAX][MAX];        // Epsilon
 
-    for (int i = 0; i < m; i++) {
-        int a, b, c;
-        scanf("%d%d%d", &a, &b, &c);
-        t[a][b][c] = 1;
-    }
+// Compute epsilon closure of a state
+void epsilonClosure(int state, int visited[]) {
+    visited[state] = 1;
 
-    dfa[0][0] = 1;   // Start state = {0}
-
-    for (int d = 0; d < count; d++) {
-
-        printf("{ ");
-        for (int i = 0; i < n; i++)
-            if (dfa[d][i])
-                printf("%d ", i);
-        printf("}");
-
-        for (int x = 0; x < 2; x++) {
-
-            int next[10] = {0};
-
-            for (int i = 0; i < n; i++)
-                if (dfa[d][i])
-                    for (int j = 0; j < n; j++)
-                        if (t[i][x][j])
-                            next[j] = 1;
-
-            printf(" --%d--> { ", x);
-
-            for (int i = 0; i < n; i++)
-                if (next[i])
-                    printf("%d ", i);
-
-            printf("}");
-
-            /* Add next state if it is new */
-            int new = 1;
-
-            for (int k = 0; k < count; k++) {
-                int same = 1;
-
-                for (int i = 0; i < n; i++)
-                    if (dfa[k][i] != next[i])
-                        same = 0;
-
-                if (same)
-                    new = 0;
-            }
-
-            if (new) {
-                for (int i = 0; i < n; i++)
-                    dfa[count][i] = next[i];
-
-                count++;
-            }
+    for (int i = 0; i < n; i++) {
+        if (eps[state][i] && !visited[i]) {
+            epsilonClosure(i, visited);
         }
-
-        printf("\n");
     }
+}
+
+int main() {
+    int i, j, k;
+
+    printf("Enter number of states: ");
+    scanf("%d", &n);
+
+    printf("Enter number of input symbols: ");
+    scanf("%d", &m);
+
+    memset(trans, 0, sizeof(trans));
+    memset(eps, 0, sizeof(eps));
+
+    // Input epsilon transitions
+    printf("Enter epsilon transition matrix:\n");
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            scanf("%d", &eps[i][j]);
+
+    // Input transitions for each symbol
+    for (k = 0; k < m; k++) {
+        printf("Transition matrix for symbol %d:\n", k);
+        for (i = 0; i < n; i++)
+            for (j = 0; j < n; j++)
+                scanf("%d", &trans[k][i][j]);
+    }
+
+    // Compute epsilon closures
+    printf("\nEpsilon Closures:\n");
+    for (i = 0; i < n; i++) {
+        int visited[MAX] = {0};
+        epsilonClosure(i, visited);
+
+        printf("E(%d) = { ", i);
+        for (j = 0; j < n; j++) {
+            closure[i][j] = visited[j];
+            if (visited[j])
+                printf("%d ", j);
+        }
+        printf("}\n");
+    }
+
+    // Construct new NFA transitions
+    printf("\nNFA without epsilon transitions:\n");
+
+    for (k = 0; k < m; k++) {
+        printf("\nFor input symbol %d:\n", k);
+
+        for (i = 0; i < n; i++) {
+            int result[MAX] = {0};
+
+            for (j = 0; j < n; j++) {
+                if (closure[i][j]) {
+                    for (int p = 0; p < n; p++) {
+                        if (trans[k][j][p]) {
+                            for (int q = 0; q < n; q++) {
+                                if (closure[p][q])
+                                    result[q] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            printf("State %d -> { ", i);
+            for (j = 0; j < n; j++)
+                if (result[j])
+                    printf("%d ", j);
+            printf("}\n");
+        }
+    }
+
+    return 0;
 }

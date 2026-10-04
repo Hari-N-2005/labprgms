@@ -47,33 +47,47 @@
     .content {
       padding: 30px;
     }
-    pre {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #e0e0e0;
-      overflow-x: auto;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #2c3e50;
+    .program-group {
+      margin-bottom: 26px;
+    }
+    .program-group h3 {
+      margin: 12px 0 18px;
+      color: #dfeaf7;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
     .file-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      align-items: stretch;
     }
     .file-list a {
-      display: block;
-      padding: 15px 20px;
-      background: #021529;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 80px;
+      padding: 14px 12px;
+      background: rgba(2, 21, 41, 0.9);
+      border: 2px solid rgba(224, 224, 224, 0.8);
+      border-radius: 10px;
       color: #fdfdfd;
       text-decoration: none;
       font-weight: 500;
       transition: all 0.3s ease;
       text-align: center;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .file-list a small {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.68rem;
+      opacity: 0.75;
+      color: #dfeaf7;
+      word-break: break-word;
     }
     .file-list a:hover {
       background: #667eea;
@@ -82,94 +96,38 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
-    .status {
-      margin-top: 20px;
-      padding: 15px;
-      text-align: center;
-      border-radius: 8px;
-      font-weight: 500;
-    }
-    .copied {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2 id="title">Auto Copy Code</h2>
+    <h2>Available Programs</h2>
     <div class="content">
-      <pre id="code-block">Loading...</pre>
-      <div id="status" class="status" style="display:none;"></div>
+      <div class="program-group">
+        <h3>Cycle 1: Automata</h3>
+        <div class="file-list">
+          <a href="http://127.0.0.1:5500/cycle1/e_nfa_to_nfa.c">E-NFA to NFA<small>cycle1/e_nfa_to_nfa.c</small></a>
+          <a href="http://127.0.0.1:5500/cycle1/e-closure.c">Epsilon Closure<small>cycle1/e-closure.c</small></a>
+          <a href="http://127.0.0.1:5500/cycle1/minimize_dfa.c">DFA Minimization<small>cycle1/minimize_dfa.c</small></a>
+          <a href="http://127.0.0.1:5500/cycle1/nfa_to_dfa.c">NFA to DFA<small>cycle1/nfa_to_dfa.c</small></a>
+        </div>
+      </div>
+
+      <div class="program-group">
+        <h3>Cycle 2: Lexical Analysis and Parsing</h3>
+        <div class="file-list">
+          <a href="http://127.0.0.1:5500/cycle2/lex_analyzer.c">Lexical Analyzer<small>cycle2/lex_analyzer.c</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/valid_string.l">Valid String (Flex)<small>cycle2/valid_string.l</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/valid_variable/valid_var.l">Valid Variable (Flex)<small>cycle2/valid_variable/valid_var.l</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/valid_variable/valid_var.y">Valid Variable (Yacc)<small>cycle2/valid_variable/valid_var.y</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/yacc_calculator/calc.l">Calculator (Flex)<small>cycle2/yacc_calculator/calc.l</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/yacc_calculator/calc.y">Calculator (Yacc)<small>cycle2/yacc_calculator/calc.y</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/for_syntax/for.l">For Syntax (Lex)<small>cycle2/for_syntax/for.l</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/for_syntax/for.y">For Syntax (Yacc)<small>cycle2/for_syntax/for.y</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/ast_generation/ast.l">AST Generation (Lex)<small>cycle2/ast_generation/ast.l</small></a>
+          <a href="http://127.0.0.1:5500/cycle2/ast_generation/ast.y">AST Generation (Yacc)<small>cycle2/ast_generation/ast.y</small></a>
+        </div>
+      </div>
     </div>
   </div>
-
-<script>
-  async function loadCode() {
-    // Get ?file=fcfs from URL
-    const params = new URLSearchParams(window.location.search);
-    const file = params.get("file");
-
-    const title = document.getElementById("title");
-    const codeBlock = document.getElementById("code-block");
-    const status = document.getElementById("status");
-
-    if (!file) {
-      title.textContent = "Available Codes";
-      const files = [
-        "fcfs.c", "sjf.c", "rr.c", "fifo.c", "lru.c", "lfu.c", 
-        "bankers.c", "priority.c", "fcfsdisk.c", "scan.c", "cscan.c",
-        "sequential.c", "linked.c", "indexed.c", "pass1.c", "pass2.c",
-        "onepassmacro.c", "absoluteloader.c", "relocatingloader.c", "palindrome.asm",
-        "16bitaddition.asm", "16bitsubtraction.asm","16bitsorting.asm","16bitsearching.asm","largestnumber.asm",
-        "largeststring.asm"
-      ];
-      
-      const links = files.map(f => `<a href="/${f}">${f}</a>`).join('');
-      codeBlock.innerHTML = `<div class="file-list">${links}</div>`;
-      codeBlock.style.background = 'transparent';
-      codeBlock.style.border = 'none';
-      codeBlock.style.padding = '0';
-      return;
-    }
-
-    title.textContent = `Code: ${file}.c`;
-
-    try {
-      const response = await fetch(`${file}.c`);
-      if (!response.ok) throw new Error("File not found");
-      const code = await response.text();
-
-      codeBlock.textContent = code;
-
-      // ✅ Optional auto-copy wrapped in try/catch
-      try {
-        await navigator.clipboard.writeText(code);
-        status.style.display = 'block';
-        status.textContent = "✅ Code copied to clipboard!";
-        status.classList.add("copied");
-      } catch (copyErr) {
-        console.warn("Clipboard permission denied or unavailable:", copyErr);
-        status.style.display = 'block';
-        status.textContent = "⚠️ Unable to copy automatically. You can copy manually.";
-        status.classList.add("warning");
-      }
-
-    } catch (err) {
-      codeBlock.textContent = "❌ Unable to load this code.";
-      status.textContent = err.message;
-      status.classList.add("error");
-    }
-  }
-
-  loadCode();
-</script>
-
 </body>
 </html>

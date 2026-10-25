@@ -2,6 +2,7 @@
 /cycle1/e-closure.c
 /cycle1/minimize_dfa.c
 /cycle1/nfa_to_dfa.c
+
 /cycle2/lex_analyzer.c
 /cycle2/valid_string.l
 /cycle2/valid_variable/valid_var.l
@@ -12,3 +13,11 @@
 /cycle2/for_syntax/for.y
 /cycle2/ast_generation/ast.l
 /cycle2/ast_generation/ast.y
+
+/cycle3/first_follow.c
+/cycle3/op_prec_parser.c
+/cycle3/recur_desc_parser.c
+/cycle3/shift_reduce_parser.c
+
+/cycle4/3ac.c
+/cycle4/intermediate_code.c

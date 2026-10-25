@@ -15,9 +15,9 @@
 /cycle2/ast_generation/ast.y
 
 /cycle3/first_follow.c
-/cycle3/op_prec_parser.c
-/cycle3/recur_desc_parser.c
-/cycle3/shift_reduce_parser.c
+/cycle3/opp.c
+/cycle3/rdp.c
+/cycle3/srp.c
 
 /cycle4/3ac.c
 /cycle4/intermediate_code.c

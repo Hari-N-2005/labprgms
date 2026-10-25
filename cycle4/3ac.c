@@ -3,37 +3,58 @@
 
 int main()
 {
-    char exp[100], tokens[100][10];
-    int count = 0, temp = 1;
+    int n, i;
+    char line[100];
+    char result[20], arg1[20], op[5], arg2[20];
 
-    printf("Enter expression: ");
-    scanf("%s", exp);
-    printf("\nThree Address Code:\n");
+    printf("Enter number of three address statements: ");
+    scanf("%d", &n);
+    getchar();
 
-    for(int i = 0; exp[i] != '\0'; i++)
+    printf("\nEnter three address code:\n");
+    printf("Example: t1 = a + b\n\n");
+
+    for (i = 0; i < n; i++)
     {
-        tokens[count][0] = exp[i];
-        tokens[count][1] = '\0';
-        count++;
-    }
+        printf("Statement %d: ", i + 1);
+        fgets(line, sizeof(line), stdin);
 
-    for(int pass = 0; pass < 2; pass++)
-    {
-        for(int i = 1; i < count - 1; i++)
+        sscanf(line, "%s = %s %s %s", result, arg1, op, arg2);
+
+        printf("\n");
+
+        if (strcmp(op, "+") == 0)
         {
-            if((pass == 0 && (tokens[i][0] == '*' || tokens[i][0] == '/')) ||
-               (pass == 1 && (tokens[i][0] == '+' || tokens[i][0] == '-')))
-            {
-                printf("t%d = %s %c %s\n",
-                    temp, tokens[i - 1], tokens[i][0], tokens[i + 1]);
-                sprintf(tokens[i - 1], "t%d", temp);
-                for(int j = i; j < count - 2; j++)
-                    strcpy(tokens[j], tokens[j + 2]);
-                count -= 2;
-                temp++;
-                i--;
-            }
+            printf("MOV AX, %s\n", arg1);
+            printf("ADD AX, %s\n", arg2);
+            printf("MOV %s, AX\n", result);
         }
+        else if (strcmp(op, "-") == 0)
+        {
+            printf("MOV AX, %s\n", arg1);
+            printf("SUB AX, %s\n", arg2);
+            printf("MOV %s, AX\n", result);
+        }
+        else if (strcmp(op, "*") == 0)
+        {
+            printf("MOV AX, %s\n", arg1);
+            printf("MOV BX, %s\n", arg2);
+            printf("MUL BX\n");
+            printf("MOV %s, AX\n", result);
+        }
+        else if (strcmp(op, "/") == 0)
+        {
+            printf("MOV AX, %s\n", arg1);
+            printf("MOV BX, %s\n", arg2);
+            printf("DIV BX\n");
+            printf("MOV %s, AX\n", result);
+        }
+        else
+        {
+            printf("Invalid operator\n");
+        }
+        
+        printf("\n");
     }
 
     return 0;
